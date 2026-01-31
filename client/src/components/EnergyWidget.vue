@@ -67,6 +67,16 @@ const processChartData = () => {
     rawData = [...rawData, ...props.energy.attributes.raw_tomorrow];
   }
 
+  // Filter Data: Show only 12h past and 12h future
+  const now = new Date();
+  const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+  const twelveHoursFuture = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+
+  rawData = rawData.filter(d => {
+    const entryDate = new Date(d.start);
+    return entryDate >= twelveHoursAgo && entryDate <= twelveHoursFuture;
+  });
+
   // Sort by time
   rawData.sort((a, b) => new Date(a.start) - new Date(b.start));
 
