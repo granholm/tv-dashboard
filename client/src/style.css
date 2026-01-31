@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom 1080p TV Base Styles */
+body {
+  @apply bg-slate-900 text-white overflow-hidden;
+  width: 1920px;
+  height: 1080px;
+}
