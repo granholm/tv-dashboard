@@ -42,11 +42,18 @@ const MOCK_DATA = {
         weather: {
             attributes: {
                 temperature: 22,
-                forecast: [
-                    { datetime: "2026-02-01T12:00:00", temperature: 21, condition: "sunny" },
-                    { datetime: "2026-02-02T12:00:00", temperature: 20, condition: "partlycloudy" },
-                    { datetime: "2026-02-03T12:00:00", temperature: 19, condition: "rainy" }
-                ]
+                pressure: 1012,
+                wind_speed: 5.5,
+                wind_bearing: 180,
+                forecast: Array.from({ length: 24 }, (_, i) => {
+                    const date = new Date();
+                    date.setHours(date.getHours() + i + 1, 0, 0, 0);
+                    return {
+                        datetime: date.toISOString(),
+                        temperature: Math.round(20 + Math.sin(i / 12 * Math.PI) * 5),
+                        condition: ['sunny', 'partlycloudy', 'cloudy', 'rainy'][Math.floor(Math.random() * 4)]
+                    };
+                })
             },
             state: "partlycloudy"
         },
@@ -118,15 +125,50 @@ app.get('/api/home-assistant', async (req, res) => {
             }
         };
 
-        // Fetch entities in parallel
-        const [weather, energy, sun] = await Promise.all([
+        // Fetch entities and forecast in parallel
+        const [weather, energy, sun, forecastRes] = await Promise.all([
             axios.get(`${haBaseUrl}/api/states/weather.smhi_home`, config).catch(e => ({ data: null })),
             axios.get(`${haBaseUrl}/api/states/sensor.nordpool`, config).catch(e => ({ data: null })),
-            axios.get(`${haBaseUrl}/api/states/sun.sun`, config).catch(e => ({ data: null }))
+            axios.get(`${haBaseUrl}/api/states/sun.sun`, config).catch(e => ({ data: null })),
+            axios.post(`${haBaseUrl}/api/services/weather/get_forecasts?return_response=true`, {
+                entity_id: 'weather.smhi_home',
+                type: 'hourly'
+            }, config).catch(e => {
+                console.error("Forecast fetch failed:", e.message);
+                if (e.response) {
+                }
+                return { data: null };
+            })
         ]);
 
+        let weatherData = weather.data || MOCK_DATA.homeAssistant.weather;
+
+        // Merge forecast data if available
+        // Structure with return_response=true is usually { service_response: { "entity_id": { forecast: [...] } } }
+        let forecastData = null;
+        if (forecastRes && forecastRes.data) {
+            if (forecastRes.data['weather.smhi_home']) {
+                forecastData = forecastRes.data['weather.smhi_home'].forecast;
+            } else if (forecastRes.data.service_response && forecastRes.data.service_response['weather.smhi_home']) {
+                forecastData = forecastRes.data.service_response['weather.smhi_home'].forecast;
+            }
+        }
+
+        if (forecastData) {
+            weatherData = {
+                ...weatherData,
+                attributes: {
+                    ...weatherData.attributes,
+                    forecast: forecastData
+                }
+            };
+        } else if (!weatherData.attributes.forecast) {
+            // Fallback to mock forecast if real one failed and no attribute exists
+            weatherData.attributes.forecast = MOCK_DATA.homeAssistant.weather.attributes.forecast;
+        }
+
         const responseData = {
-            weather: weather.data || MOCK_DATA.homeAssistant.weather,
+            weather: weatherData,
             energy: energy.data || MOCK_DATA.homeAssistant.energy,
             sun: sun.data || MOCK_DATA.homeAssistant.sun
         };
