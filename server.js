@@ -71,12 +71,29 @@ app.get('/api/news', async (req, res) => {
     try {
         if (MOCK_MODE) {
             console.log('Serving Mock News Data');
-            return res.json(MOCK_DATA.news);
+            // Add mock images
+            const enrichedNews = {
+                ...MOCK_DATA.news,
+                items: MOCK_DATA.news.items.map(item => ({
+                    ...item,
+                    image: `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`
+                }))
+            };
+            return res.json(enrichedNews);
         }
 
         const rssUrl = process.env.RSS_FEED_URL || 'https://news.google.com/rss';
         console.log(`Fetching RSS from: ${rssUrl}`);
         const feed = await parser.parseURL(rssUrl);
+
+        // Attempt to extract images from content/description
+        feed.items = feed.items.map(item => {
+            const content = item.content || item.contentSnippet || item.description || '';
+            const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+            const image = imgMatch ? imgMatch[1] : `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`; // Fallback image
+            return { ...item, image };
+        });
+
         res.json(feed);
     } catch (error) {
         console.error('Error fetching news:', error.message);

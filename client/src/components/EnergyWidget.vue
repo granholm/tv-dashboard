@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+import { ref, computed, onMounted, watch, onUnmounted, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
 
 const props = defineProps({
@@ -149,7 +149,8 @@ const renderChart = () => {
   });
 };
 
-watch(() => props.energy, () => {
+watch(() => props.energy, async () => {
+  await nextTick();
   renderChart();
 });
 
