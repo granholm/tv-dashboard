@@ -21,7 +21,7 @@
               {{ currentArticle.contentSnippet || currentArticle.content }}
             </p>
             <div class="flex items-center text-sm text-slate-400">
-              <span class="mr-4">{{ currentArticle.source || 'Google News' }}</span>
+              <span class="mr-4">{{ source || currentArticle.source || 'News' }}</span>
               <span>{{ formatTime(currentArticle.pubDate) }}</span>
             </div>
           </div>
@@ -42,7 +42,8 @@ const props = defineProps({
   news: {
     type: Array,
     required: true
-  }
+  },
+  source: String
 });
 
 const currentIndex = ref(0);

@@ -3,11 +3,11 @@
     <!-- Top Section (Height: 66%) -->
     <!-- Main Area (Left 75% -> 3 columns) -->
     <div class="col-span-3 row-span-2 bg-slate-800 rounded-2xl shadow-xl overflow-hidden relative border border-slate-700">
-      <NewsRotator :news="newsData.featured" />
+      <NewsRotator :news="newsData.featured" :source="newsData.source" />
     </div>
 
     <!-- Sidebar (Right 25% -> 1 column) -->
-    <div class="col-span-1 row-span-2 bg-slate-800 rounded-2xl shadow-xl p-4 overflow-y-auto border border-slate-700">
+    <div class="col-span-1 row-span-2 bg-slate-800 rounded-2xl shadow-xl p-4 overflow-y-auto border border-slate-700 scrollbar-hide">
       <h2 class="text-xl font-bold mb-4 text-slate-300 border-b border-slate-600 pb-2">Latest News</h2>
       <div v-if="newsData.loading" class="text-center py-10 text-slate-500">Loading feeds...</div>
       <ul v-else class="space-y-4">
@@ -43,6 +43,7 @@ import EnergyWidget from './EnergyWidget.vue';
 const newsData = ref({
   featured: [],
   list: [],
+  source: '',
   loading: true
 });
 
@@ -73,6 +74,7 @@ const fetchData = async () => {
     if (newsRes.data && newsRes.data.items) {
       newsData.value.list = newsRes.data.items.slice(0, 10);
       newsData.value.featured = newsRes.data.items.slice(0, 5); // Use top 5 for rotator
+      newsData.value.source = newsRes.data.title;
       newsData.value.loading = false;
     }
 

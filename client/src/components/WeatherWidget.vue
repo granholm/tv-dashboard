@@ -4,7 +4,11 @@
     <div class="flex items-start justify-between">
       <!-- Left: Weather State -->
       <div class="flex items-center pt-2">
-        <div class="text-7xl mr-6">{{ getWeatherIcon(weather.state) }}</div>
+        <div class="text-7xl mr-6">
+          <svg class="w-20 h-20 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path :d="getWeatherIconPath(weather.state)" />
+          </svg>
+        </div>
         <div>
           <div class="text-7xl font-bold">{{ weather.attributes.temperature }}°</div>
           <div class="text-2xl text-slate-400 capitalize">{{ weather.state }}</div>
@@ -76,7 +80,11 @@
         <div v-for="(item, index) in forecastList" :key="index" 
              class="flex-shrink-0 w-20 bg-slate-700/50 rounded-lg p-2 text-center flex flex-col items-center snap-start">
           <div class="text-slate-400 text-xs mb-1">{{ getHour(item.datetime) }}</div>
-          <div class="text-xl mb-1">{{ getWeatherIcon(item.condition) }}</div>
+          <div class="mb-1">
+            <svg class="w-8 h-8 mx-auto text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+               <path :d="getWeatherIconPath(item.condition)" />
+            </svg>
+          </div>
           <div class="text-base font-bold">{{ Math.round(item.temperature) }}°</div>
         </div>
       </div>
@@ -89,6 +97,7 @@
 
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { weatherIcons } from './weatherIconList.js';
 
 const props = defineProps({
   weather: Object,
@@ -136,18 +145,9 @@ const getWindCardinal = (degrees) => {
   return cardinals[index % 8];
 };
 
-// Simple mapping for text-based icons (replace with SVG or Image assets)
-const getWeatherIcon = (condition) => {
-  const map = {
-    'sunny': '☀️',
-    'clear': '🌙',
-    'partlycloudy': '⛅',
-    'cloudy': '☁️',
-    'rainy': 'wm',
-    'pouring': '🌧️',
-    'snowy': '❄️',
-    'lightning': '⚡'
-  };
-  return map[condition?.toLowerCase()] || '❓';
+const getWeatherIconPath = (condition) => {
+  if (!condition) return weatherIcons.default;
+  const normalized = condition.toLowerCase().replace(/\s+/g, '-');
+  return weatherIcons[normalized] || weatherIcons.default;
 };
 </script>

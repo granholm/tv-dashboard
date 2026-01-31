@@ -1,16 +1,28 @@
 <template>
   <div class="h-full flex flex-col" v-if="energy">
     <!-- Current Price Header -->
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex items-end justify-between mb-4">
       <div>
-        <div class="text-sm text-slate-400 uppercase tracking-widest">Electricity Price</div>
-        <div :class="['text-7xl font-bold truncate', priceColorClass]">
-          {{ energy.state }} <span class="text-2xl text-slate-500">c/kWh</span>
+        <div class="text-sm text-slate-400 uppercase tracking-widest mb-1">Electricity Price</div>
+        <div :class="['text-7xl font-bold truncate leading-none', getPriceColor(currentPrice)]">
+          {{ currentPrice }} <span class="text-2xl text-slate-500">c/kWh</span>
         </div>
       </div>
-      <!-- Status Badge -->
-      <div :class="['px-4 py-2 rounded-full text-sm font-bold uppercase', statusBadgeClass]">
-        {{ priceStatus }}
+      
+      <!-- Right Side Stats -->
+      <div class="flex flex-col items-end space-y-2">
+         <!-- Status Badge -->
+        <div :class="['px-4 py-1 rounded-full text-xs font-bold uppercase text-center w-fit', statusBadgeClass]">
+          {{ priceStatus }}
+        </div>
+        
+        <!-- Daily Average -->
+        <div class="text-right">
+             <div class="text-xs text-slate-400 uppercase tracking-widest">Daily Avg</div>
+             <div :class="['text-2xl font-bold', getPriceColor(dailyAverage)]">
+                {{ dailyAverage }} <span class="text-sm text-slate-500">c</span>
+             </div>
+        </div>
       </div>
     </div>
 
@@ -35,18 +47,36 @@ const props = defineProps({
 const chartCanvas = ref(null);
 let chartInstance = null;
 
+const currentPrice = computed(() => {
+  const val = parseFloat(props.energy?.state || 0);
+  return val.toFixed(1);
+});
+
+const dailyAverage = computed(() => {
+  // Use attribute if available, else calculate from raw_today
+  if (props.energy?.attributes?.average !== undefined) {
+      return parseFloat(props.energy.attributes.average).toFixed(1);
+  }
+  // Fallback calculation
+  if (props.energy?.attributes?.raw_today?.length) {
+      const sum = props.energy.attributes.raw_today.reduce((acc, cur) => acc + cur.value, 0);
+      return (sum / props.energy.attributes.raw_today.length).toFixed(1);
+  }
+  return '0.0';
+});
+
+const getPriceColor = (priceStr) => {
+  const price = parseFloat(priceStr);
+  if (price < 10) return 'text-green-400';
+  if (price < 20) return 'text-yellow-400';
+  return 'text-red-400';
+};
+
 const priceStatus = computed(() => {
   const price = parseFloat(props.energy?.state || 0);
   if (price < 10) return 'Low';
   if (price < 20) return 'Medium';
   return 'High';
-});
-
-const priceColorClass = computed(() => {
-  const price = parseFloat(props.energy?.state || 0);
-  if (price < 10) return 'text-green-400';
-  if (price < 20) return 'text-yellow-400';
-  return 'text-red-400';
 });
 
 const statusBadgeClass = computed(() => {
@@ -67,14 +97,14 @@ const processChartData = () => {
     rawData = [...rawData, ...props.energy.attributes.raw_tomorrow];
   }
 
-  // Filter Data: Show only 12h past and 12h future
+  // Filter Data: Show only 6h past and 18h future
   const now = new Date();
-  const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-  const twelveHoursFuture = new Date(now.getTime() + 12 * 60 * 60 * 1000);
+  const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+  const eighteenHoursFuture = new Date(now.getTime() + 18 * 60 * 60 * 1000);
 
   rawData = rawData.filter(d => {
     const entryDate = new Date(d.start);
-    return entryDate >= twelveHoursAgo && entryDate <= twelveHoursFuture;
+    return entryDate >= sixHoursAgo && entryDate <= eighteenHoursFuture;
   });
 
   // Sort by time
