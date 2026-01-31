@@ -54,7 +54,7 @@ const MOCK_DATA = {
             state: 15.4, // Current price in cents
             attributes: {
                 raw_today: Array.from({ length: 24 }, (_, i) => ({ start: `2026-01-31T${i.toString().padStart(2, '0')}:00:00`, value: Math.random() * 30 })),
-                raw_tomorrow: []
+                raw_tomorrow: Array.from({ length: 24 }, (_, i) => ({ start: `2026-02-01T${i.toString().padStart(2, '0')}:00:00`, value: Math.random() * 30 }))
             }
         },
         sun: {
