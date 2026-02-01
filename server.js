@@ -96,11 +96,27 @@ app.get('/api/news', async (req, res) => {
         console.log(`Fetching RSS from: ${rssUrl}`);
         const feed = await parser.parseURL(rssUrl);
 
-        // Attempt to extract images from content/description
+        // Attempt to extract images from enclosure or content/description
         feed.items = feed.items.map(item => {
-            const content = item.content || item.contentSnippet || item.description || '';
-            const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-            const image = imgMatch ? imgMatch[1] : `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`; // Fallback image
+            let image = null;
+
+            // 1. Check for enclosure (standard RSS media attachment)
+            if (item.enclosure && item.enclosure.url) {
+                image = item.enclosure.url;
+            }
+
+            // 2. Fallback: Search for <img> tag in content
+            if (!image) {
+                const content = item.content || item.contentSnippet || item.description || '';
+                const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+                if (imgMatch) image = imgMatch[1];
+            }
+
+            // 3. Last resort: Mock image
+            if (!image) {
+                image = `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`;
+            }
+
             return { ...item, image };
         });
 
