@@ -1,96 +1,95 @@
 <template>
   <div class="h-full flex flex-col justify-between" v-if="weather">
-    <!-- Top Section: Current Weather & Clock -->
-    <div class="flex items-start justify-between">
+    <!-- Main Section: Weather & Details -->
+    <div class="flex-1 flex items-center justify-center gap-12 min-h-0 pt-2 px-">
+      
       <!-- Left: Weather State -->
-      <div class="flex items-center pt-2">
-        <div class="text-7xl mr-6">
-          <svg class="w-20 h-20 text-white" viewBox="0 0 24 24" fill="currentColor">
+      <div class="flex items-center gap-8 ml-16">
+        <div class="text-7xl text-white filter drop-shadow-md">
+          <svg class="w-24 h-24" viewBox="0 0 24 24" fill="currentColor">
             <path :d="getWeatherIconPath(weather.state)" />
           </svg>
         </div>
         <div>
-          <div class="text-7xl font-bold">{{ weather.attributes.temperature }}°</div>
-          <div class="text-2xl text-slate-400 capitalize">{{ weather.state }}</div>
-        </div>
-      </div>
-      
-      <!-- Right: Clock -->
-      <div class="text-right pt-2">
-        <div class="text-6xl font-bold tracking-tight">{{ currentTime }}</div>
-        <div class="text-xl text-slate-400">{{ currentDate }}</div>
-      </div>
-    </div>
-
-    <!-- Middle Section: Details Grid -->
-    <div class="grid grid-cols-4 gap-6 mt-4 mb-2">
-      <!-- Wind -->
-      <div class="bg-slate-700/30 rounded-xl p-3 flex flex-col items-center justify-center">
-        <div class="text-slate-400 text-sm uppercase tracking-wider mb-1">Wind</div>
-        <div class="flex items-center space-x-2">
-          <span class="text-2xl">💨</span>
-          <div class="flex flex-col items-start leading-none">
-            <span class="text-xl font-bold">{{ weather.attributes.wind_speed }} <span class="text-sm font-normal text-slate-400">m/s</span></span>
-            <span class="text-xs text-slate-400 flex items-center mt-1">
-              <span class="inline-block transform origin-center transition-transform duration-500" :style="{ transform: `rotate(${weather.attributes.wind_bearing}deg)` }">↓</span>
-              <span class="ml-1">{{ getWindCardinal(weather.attributes.wind_bearing) }}</span>
-            </span>
+          <div class="text-8xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-400">
+            {{ weather.attributes.temperature }}°
+          </div>
+          <div class="text-2xl text-slate-400 font-medium tracking-wide capitalize pl-2">
+            {{ weather.state }}
           </div>
         </div>
       </div>
 
-      <!-- Pressure -->
-      <div class="bg-slate-700/30 rounded-xl p-3 flex flex-col items-center justify-center">
-        <div class="text-slate-400 text-sm uppercase tracking-wider mb-1">Pressure</div>
-        <div class="flex items-center space-x-2">
-          <span class="text-2xl">🧭</span>
-          <div class="flex flex-col items-start leading-none">
-            <span class="text-xl font-bold">{{ weather.attributes.pressure }}</span>
-            <span class="text-sm text-slate-400">hPa</span>
+      <!-- Integrated Details -->
+      <div class="flex items-center gap-10 px-10 border-l border-r border-slate-700/50 mx-4">
+        <!-- Wind -->
+        <div class="flex flex-col items-center group min-w-[5rem]">
+          <div class="flex items-center gap-2 mb-1 opacity-70 group-hover:opacity-100 transition-opacity">
+            <svg class="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M4.5 10h9.5c1.66 0 3-1.34 3-3s-1.34-3-3-3h-2c-0.55 0-1-0.45-1-1s0.45-1 1-1h2c2.76 0 5 2.24 5 5s-2.24 5-5 5h-9.5v-2zm12 4h-7.5c-2.76 0-5 2.24-5 5s2.24 5 5 5h4c0.55 0 1-0.45 1-1s-0.45-1-1-1h-4c-1.66 0-3-1.34-3-3s1.34-3 3-3h7.5v-2z" />
+            </svg>
+             <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Wind</span>
+          </div>
+          <div class="text-xl font-bold">{{ weather.attributes.wind_speed }} <span class="text-sm font-normal text-slate-500">m/s</span></div>
+          <div class="text-xs text-blue-400 font-medium flex items-center mt-0.5">
+             <span class="inline-block transform transition-transform duration-500" :style="{ transform: `rotate(${weather.attributes.wind_bearing - 180}deg)` }">↓</span>
+             <span class="ml-1">{{ getWindCardinal(weather.attributes.wind_bearing) }}</span>
           </div>
         </div>
-      </div>
 
-      <!-- Sunrise -->
-      <div class="bg-slate-700/30 rounded-xl p-3 flex flex-col items-center justify-center">
-         <div class="text-slate-400 text-sm uppercase tracking-wider mb-1">Sunrise</div>
-         <div class="flex items-center space-x-2">
-           <svg class="w-8 h-8 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
-             <path d="M20 18H4v-2h16v2zM12 5L4 13h5v3h6v-3h5L12 5z" />
-           </svg>
-           <span class="text-2xl font-bold">{{ formatTime(sun?.attributes?.next_rising) }}</span>
-         </div>
-      </div>
+        <!-- Pressure -->
+        <div class="flex flex-col items-center group min-w-[5rem]">
+          <div class="flex items-center gap-2 mb-1 opacity-70 group-hover:opacity-100 transition-opacity">
+            <svg class="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8 8-8zm-1-12h2v4.25l2.6 1.5-1 1.73-3.6-2.08v-5.4z" />
+            </svg>
+             <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Baro</span>
+          </div>
+          <div class="text-xl font-bold">{{ weather.attributes.pressure }}</div>
+          <span class="text-xs text-slate-500">hPa</span>
+        </div>
 
-      <!-- Sunset -->
-      <div class="bg-slate-700/30 rounded-xl p-3 flex flex-col items-center justify-center">
-         <div class="text-slate-400 text-sm uppercase tracking-wider mb-1">Sunset</div>
-         <div class="flex items-center space-x-2">
-           <svg class="w-8 h-8 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
-             <path d="M20 18H4v-2h16v2zM12 16l8-8h-5V5H9v3H4l8 8z" />
-           </svg>
-           <span class="text-2xl font-bold">{{ formatTime(sun?.attributes?.next_setting) }}</span>
-         </div>
+        <!-- Sun Phase -->
+        <div class="flex flex-col items-center group px-2">
+           <div class="flex items-center gap-2 mb-1 opacity-70 group-hover:opacity-100 transition-opacity">
+             <svg class="w-5 h-5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
+               <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 9c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+             </svg>
+             <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Sun</span>
+           </div>
+           
+           <div class="flex items-center gap-6">
+             <div class="flex flex-col items-center">
+                <span class="text-xl font-bold text-yellow-400">{{ formatTime(sun?.attributes?.next_rising) }}</span>
+                <span class="text-xs text-slate-500">Rise</span>
+             </div>
+             <div class="w-px h-8 bg-slate-700"></div>
+             <div class="flex flex-col items-center">
+                <span class="text-xl font-bold text-orange-400">{{ formatTime(sun?.attributes?.next_setting) }}</span>
+                <span class="text-xs text-slate-500">Set</span>
+             </div>
+           </div>
+        </div>
       </div>
     </div>
 
     <!-- Bottom: Hourly Forecast -->
-    <div class="mt-2 -mx-2">
-      <div class="flex overflow-x-auto space-x-3 pb-2 px-2 scrollbar-hide">
+    <div class="mt-6 border-t border-slate-700/50 pt-4 -mx-2 px-2"> <!-- Added margin logic for aesthetics -->
+      <div class="flex overflow-x-auto space-x-2 pb-1 scrollbar-hide mask-fade-sides">
         <div v-for="(item, index) in forecastList" :key="index" 
-             class="flex-shrink-0 w-20 bg-slate-700/50 rounded-lg p-2 text-center flex flex-col items-center snap-start">
-          <div class="text-slate-400 text-xs mb-1">{{ getHour(item.datetime) }}</div>
-          <div class="mb-1">
-            <svg class="w-8 h-8 mx-auto text-slate-300" viewBox="0 0 24 24" fill="currentColor">
+             class="flex-shrink-0 w-20 py-3 rounded-xl flex flex-col items-center justify-center transition-all bg-slate-800/40 hover:bg-slate-700/60 border border-transparent hover:border-slate-600/50">
+          <div class="text-slate-400 text-xs mb-2 font-medium">{{ getHour(item.datetime) }}</div>
+          <div class="mb-2 drop-shadow-sm">
+            <svg class="w-8 h-8 text-slate-200" viewBox="0 0 24 24" fill="currentColor">
                <path :d="getWeatherIconPath(item.condition)" />
             </svg>
           </div>
-          <div class="text-base font-bold">{{ Math.round(item.temperature) }}°</div>
+          <div class="text-lg font-bold">{{ Math.round(item.temperature) }}°</div>
         </div>
       </div>
     </div>
   </div>
-  <div v-else class="h-full flex items-center justify-center text-slate-500">
+  <div v-else class="h-full flex items-center justify-center text-slate-500 animate-pulse">
     Loading Weather...
   </div>
 </template>
@@ -102,25 +101,6 @@ import { weatherIcons } from './weatherIconList.js';
 const props = defineProps({
   weather: Object,
   sun: Object
-});
-
-const currentTime = ref('');
-const currentDate = ref('');
-let clockInterval;
-
-const updateClock = () => {
-  const now = new Date();
-  currentTime.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  currentDate.value = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-};
-
-onMounted(() => {
-  updateClock();
-  clockInterval = setInterval(updateClock, 1000);
-});
-
-onUnmounted(() => {
-  clearInterval(clockInterval);
 });
 
 const forecastList = computed(() => {

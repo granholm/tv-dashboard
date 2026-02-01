@@ -31,6 +31,16 @@
       <!-- Progress Bar -->
       <div class="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-100 ease-linear"
            :style="{ width: `${progress}%` }"></div>
+
+      <!-- Clock Overlay -->
+      <!-- Clock Gradient Background -->
+      <div class="absolute top-0 left-0 w-1/3 h-1/2 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-black/70 via-black/10 to-transparent z-20 pointer-events-none"></div>
+
+      <!-- Clock Overlay -->
+      <div class="absolute top-8 left-10 z-30 pointer-events-none">
+        <div class="text-8xl font-bold tracking-tight text-white drop-shadow-lg leading-none">{{ currentTime }}</div>
+        <div class="text-3xl text-slate-300 drop-shadow-md font-light mt-2">{{ currentDate }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +61,17 @@ const progress = ref(0);
 const duration = 60000; // 60 seconds
 let timer;
 let progressTimer;
+
+// Clock State
+const currentTime = ref('');
+const currentDate = ref('');
+let clockInterval;
+
+const updateClock = () => {
+  const now = new Date();
+  currentTime.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  currentDate.value = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+};
 
 const currentArticle = computed(() => {
   return props.news[currentIndex.value] || {};
@@ -93,12 +114,15 @@ watch(() => props.news, (newVal) => {
 });
 
 onMounted(() => {
+  updateClock();
+  clockInterval = setInterval(updateClock, 1000);
   if (props.news.length > 0) startRotation();
 });
 
 onUnmounted(() => {
   clearInterval(timer);
   clearInterval(progressTimer);
+  clearInterval(clockInterval);
 });
 </script>
 
