@@ -62,12 +62,10 @@ const formatTime = (dateStr) => {
 
 const fetchData = async () => {
   try {
-    // Determine API Base URL (hostname dependent or relative if proxied)
-    // Using relative path assuming served from same origin or proxy set in vite
-    // However, during dev they are on different ports (3000 vs 5173).
-    // We configured root package.json to run both.
-    // For local dev, we might need full URL or proxy.
-    const API_BASE = 'http://localhost:3000'; 
+    // Use relative path for API calls. 
+    // In production (served by Node), this works automatically.
+    // In development, Vite proxy will handle forwarding to localhost:3000.
+    const API_BASE = ''; 
 
     // Fetch News
     const newsRes = await axios.get(`${API_BASE}/api/news`);
