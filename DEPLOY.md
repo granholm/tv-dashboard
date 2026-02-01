@@ -2,16 +2,13 @@
 
 This guide assumes you have a Raspberry Pi with Raspberry Pi OS (formerly Raspbian) installed and connected to your network.
 
-## 1. Install Node.js
-If you haven't already, install Node.js (Version 18+ recommended):
+## 1. Install Bun
+If you haven't already, install Bun:
 
 ```bash
-# Update package list
-sudo apt update
-
-# Install Node.js (using NodeSource setup script for latest LTS)
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+# Make sure to follow the instructions to add bun to your PATH
 ```
 
 ## 2. Clone the Repository
@@ -27,11 +24,11 @@ Install all libraries and build the frontend:
 
 ```bash
 # Install backend and frontend dependencies
-npm install
-npm install --prefix client
+bun install
+bun install --cwd client
 
 # Build the frontend for production
-npm run build --prefix client
+bun run --cwd client build
 ```
 
 ## 4. Configuration
@@ -52,7 +49,7 @@ Make sure your Pi has a static IP or a known hostname (e.g., `raspberrypi.local`
 You can start the server manually to test:
 
 ```bash
-node server.js
+bun server.js
 ```
 Now access it from your browser at: `http://<YOUR_PI_IP>:3000`
 
@@ -61,10 +58,10 @@ To keep the dashboard running even after a reboot, use PM2:
 
 ```bash
 # Install PM2 globally
-sudo npm install -g pm2
+bun install -g pm2
 
 # Start the dashboard
-pm2 start server.js --name tv-dashboard
+pm2 start server.js --name tv-dashboard --interpreter bun
 
 # Freeze the process list for auto-resurrection
 pm2 save

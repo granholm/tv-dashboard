@@ -13,7 +13,7 @@ A 1080p dashboard designed for Raspberry Pi to display Home Assistant data, weat
 ## Tech Stack
 
 - **Frontend**: Vue 3 + Vite + Tailwind CSS
-- **Backend**: Node.js + Express (Acts as a proxy/API gateway)
+- **Backend**: Bun + Express (Acts as a proxy/API gateway)
 - **Charts**: Chart.js
 
 ## Installation
@@ -26,7 +26,7 @@ A 1080p dashboard designed for Raspberry Pi to display Home Assistant data, weat
 
 2. Install dependencies (for both server and client):
    ```bash
-   npm install && npm install --prefix client
+   bun install-all
    ```
 
 3. Configure Environment:
@@ -42,7 +42,7 @@ A 1080p dashboard designed for Raspberry Pi to display Home Assistant data, weat
 Start both the backend server and frontend client with one command:
 
 ```bash
-npm run dev
+bun run dev
 ```
 
 - **Frontend**: http://localhost:5173
