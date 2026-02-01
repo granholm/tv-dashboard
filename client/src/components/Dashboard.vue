@@ -71,7 +71,7 @@ const fetchData = async () => {
     const newsRes = await axios.get(`${API_BASE}/api/news`);
     if (newsRes.data && newsRes.data.items) {
       newsData.value.list = newsRes.data.items.slice(0, 10);
-      newsData.value.featured = newsRes.data.items.slice(0, 5); // Use top 5 for rotator
+      newsData.value.featured = newsRes.data.items.slice(0, 10); // Use top 10 for rotator
       newsData.value.source = newsRes.data.title;
       newsData.value.loading = false;
     }
@@ -89,7 +89,7 @@ const fetchData = async () => {
 let interval;
 onMounted(() => {
   fetchData();
-  interval = setInterval(fetchData, 300000); // Refresh every 5 mins
+  interval = setInterval(fetchData, 600000); // Refresh every 10 mins
 });
 
 onUnmounted(() => {
