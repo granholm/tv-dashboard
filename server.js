@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const Parser = require('rss-parser');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'client/dist')));
 
 // Mock Mode Configuration
 const MOCK_MODE = process.env.MOCK_MODE === 'true' || false;
@@ -179,6 +181,11 @@ app.get('/api/home-assistant', async (req, res) => {
         console.error('Error fetching HA data:', error.message);
         res.status(500).json({ error: 'Failed to fetch Home Assistant data' });
     }
+});
+
+// Serve Vue App for any other requests (SPA Support)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
 // Start Server
