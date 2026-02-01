@@ -7,7 +7,7 @@
     "scripts": {
         "start": "bun server.js",
         "server": "bun server.js",
-        "client": "bun run dev --cwd client",
+        "client": "bun run --cwd client dev",
         "dev": "concurrently \"bun run server\" \"bun run client\"",
         "install-all": "bun install && bun install --cwd client"
     },
