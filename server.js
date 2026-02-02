@@ -8,7 +8,8 @@ const app = express();
 const parser = new Parser({
     customFields: {
         item: [
-            ['media:content', 'mediaContent']
+            ['media:content', 'mediaContent'],
+            ['media:thumbnail', 'mediaThumbnail']
         ]
     }
 });
@@ -133,6 +134,15 @@ app.get('/api/news', async (req, res) => {
                         const attrs = m['$'];
                         return attrs && attrs.url && (attrs.medium === 'image' || !attrs.medium);
                     });
+                    if (found) {
+                        image = found['$'].url;
+                    }
+                }
+
+                // 1.5. Check for media:thumbnail
+                if (!image && item.mediaThumbnail) {
+                    const thumbList = Array.isArray(item.mediaThumbnail) ? item.mediaThumbnail : [item.mediaThumbnail];
+                    const found = thumbList.find(t => t['$'] && t['$'].url);
                     if (found) {
                         image = found['$'].url;
                     }
