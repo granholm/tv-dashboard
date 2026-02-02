@@ -2,7 +2,8 @@
 
 A 1080p dashboard designed for a Raspberry Pi or equivalent to display a newsfeed, Home Assistant data, weather, energy prices.
 
-<img width="1916" height="1077" alt="image" src="https://github.com/user-attachments/assets/c05ea951-a0eb-47e8-ae72-8d0ad548c2ce" />
+<img width="1919" height="1078" alt="image" src="https://github.com/user-attachments/assets/b487560d-6d36-461b-ad73-8def624cc78d" />
+
 
 ## Features
 
