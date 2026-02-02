@@ -9,7 +9,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const parser = new Parser();
+const parser = new Parser({
+    customFields: {
+        item: [
+            ['media:content', 'mediaContent']
+        ]
+    }
+});
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -103,8 +109,20 @@ app.get('/api/news', async (req, res) => {
         feed.items = feed.items.map(item => {
             let image = null;
 
-            // 1. Check for enclosure (standard RSS media attachment)
-            if (item.enclosure && item.enclosure.url) {
+            // 1. Check for media:content
+            if (item.mediaContent) {
+                const mediaList = Array.isArray(item.mediaContent) ? item.mediaContent : [item.mediaContent];
+                const found = mediaList.find(m => {
+                    const attrs = m['$'];
+                    return attrs && attrs.url && (attrs.medium === 'image' || !attrs.medium);
+                });
+                if (found) {
+                    image = found['$'].url;
+                }
+            }
+
+            // 2. Check for enclosure (standard RSS media attachment)
+            if (!image && item.enclosure && item.enclosure.url) {
                 image = item.enclosure.url;
             }
 
