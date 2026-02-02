@@ -3,10 +3,6 @@ import axios from 'axios';
 import Parser from 'rss-parser';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const parser = new Parser({
