@@ -3,12 +3,13 @@
     "version": "1.0.0",
     "description": "Smart Home Dashboard for Raspberry Pi",
     "main": "server.js",
+    "type": "module",
     "scripts": {
-        "start": "node server.js",
-        "server": "node server.js",
-        "client": "npm run dev --prefix client",
-        "dev": "concurrently \"npm run server\" \"npm run client\"",
-        "install-all": "npm install && npm install --prefix client"
+        "start": "bun server.js",
+        "server": "bun server.js",
+        "client": "bun run --cwd client dev",
+        "dev": "concurrently \"bun run server\" \"bun run client\"",
+        "install-all": "bun install && bun install --cwd client"
     },
     "dependencies": {
         "@mdi/js": "^7.4.47",

@@ -32,7 +32,7 @@
           </div>
           <div class="text-xl font-bold">{{ weather.attributes.wind_speed }} <span class="text-sm font-normal text-slate-500">m/s</span></div>
           <div class="text-xs text-blue-400 font-medium flex items-center mt-0.5">
-             <span class="inline-block transform transition-transform duration-500" :style="{ transform: `rotate(${weather.attributes.wind_bearing - 180}deg)` }">↓</span>
+             <span class="inline-block transform transition-transform duration-500" :style="{ transform: `rotate(${weather.attributes.wind_bearing}deg)` }">↓</span>
              <span class="ml-1">{{ getWindCardinal(weather.attributes.wind_bearing) }}</span>
           </div>
         </div>
