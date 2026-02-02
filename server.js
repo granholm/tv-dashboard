@@ -97,51 +97,88 @@ app.get('/api/news', async (req, res) => {
             return res.json(enrichedNews);
         }
 
-        const rssUrl = process.env.RSS_FEED_URL || 'https://news.google.com/rss';
-        console.log(`Fetching RSS from: ${rssUrl}`);
-        const feed = await parser.parseURL(rssUrl);
+        const rssUrls = (process.env.RSS_FEED_URL || 'https://news.google.com/rss')
+            .split(',')
+            .map(url => url.trim())
+            .filter(url => url.length > 0);
 
-        // Attempt to extract images from enclosure or content/description
-        feed.items = feed.items.map(item => {
-            let image = null;
+        console.log(`Fetching RSS from: ${rssUrls.join(', ')}`);
 
-            // 1. Check for media:content
-            if (item.mediaContent) {
-                const mediaList = Array.isArray(item.mediaContent) ? item.mediaContent : [item.mediaContent];
-                const found = mediaList.find(m => {
-                    const attrs = m['$'];
-                    return attrs && attrs.url && (attrs.medium === 'image' || !attrs.medium);
-                });
-                if (found) {
-                    image = found['$'].url;
+        const feedPromises = rssUrls.map(url => parser.parseURL(url).catch(e => {
+            console.error(`Error fetching feed ${url}: ${e.message}`);
+            return null;
+        }));
+
+        const validFeeds = (await Promise.all(feedPromises)).filter(feed => feed !== null);
+
+        if (validFeeds.length === 0) {
+            // If all failed, throw error to be caught below
+            throw new Error("Failed to fetch any RSS feeds");
+        }
+
+        let allItems = [];
+        const titles = [];
+
+        validFeeds.forEach(feed => {
+            if (feed.title) titles.push(feed.title);
+
+            // Process items
+            const processedItems = feed.items.map(item => {
+                let image = null;
+
+                // 1. Check for media:content
+                if (item.mediaContent) {
+                    const mediaList = Array.isArray(item.mediaContent) ? item.mediaContent : [item.mediaContent];
+                    const found = mediaList.find(m => {
+                        const attrs = m['$'];
+                        return attrs && attrs.url && (attrs.medium === 'image' || !attrs.medium);
+                    });
+                    if (found) {
+                        image = found['$'].url;
+                    }
                 }
-            }
 
-            // 2. Check for enclosure (standard RSS media attachment)
-            if (!image && item.enclosure && item.enclosure.url) {
-                image = item.enclosure.url;
-            }
+                // 2. Check for enclosure (standard RSS media attachment)
+                if (!image && item.enclosure && item.enclosure.url) {
+                    image = item.enclosure.url;
+                }
 
-            // 2. Fallback: Search for <img> tag in content
-            if (!image) {
-                const content = item.content || item.contentSnippet || item.description || '';
-                const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
-                if (imgMatch) image = imgMatch[1];
-            }
+                // 3. Fallback: Search for <img> tag in content
+                if (!image) {
+                    const content = item.content || item.contentSnippet || item.description || '';
+                    const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
+                    if (imgMatch) image = imgMatch[1];
+                }
 
-            // 3. Last resort: Mock image
-            if (!image) {
-                image = `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`;
-            }
+                // 4. Last resort: Mock image
+                if (!image) {
+                    image = `https://picsum.photos/seed/${encodeURIComponent(item.title)}/800/600`;
+                }
 
-            return { ...item, image };
+                return { ...item, image, source: feed.title };
+            });
+
+            allItems = allItems.concat(processedItems);
         });
 
-        res.json(feed);
+        // Sort combined items by date (descending)
+        allItems.sort((a, b) => {
+            const dateA = new Date(a.pubDate || 0);
+            const dateB = new Date(b.pubDate || 0);
+            return dateB - dateA;
+        });
+
+        // If multiple feeds, set title to null so client uses per-article source
+        const combinedFeed = {
+            title: titles.length === 1 ? titles[0] : null,
+            items: allItems
+        };
+
+        res.json(combinedFeed);
     } catch (error) {
         console.error('Error fetching news:', error.message);
-        // Fallback to mock data on error if desired, or return error
-        res.status(500).json({ error: 'Failed to fetch news' });
+        // Fallback to mock data on error
+        res.status(500).json({ error: 'Failed to fetch news', details: error.message });
     }
 });
 

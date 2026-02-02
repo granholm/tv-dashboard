@@ -30,7 +30,7 @@
             </svg>
              <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Wind</span>
           </div>
-          <div class="text-xl font-bold">{{ weather.attributes.wind_speed }} <span class="text-sm font-normal text-slate-500">m/s</span></div>
+          <div class="text-xl font-bold">{{ roundValue(weather.attributes.wind_speed) }} <span class="text-sm font-normal text-slate-500">m/s</span></div>
           <div class="text-xs text-blue-400 font-medium flex items-center mt-0.5">
              <span class="inline-block transform transition-transform duration-500" :style="{ transform: `rotate(${weather.attributes.wind_bearing}deg)` }">↓</span>
              <span class="ml-1">{{ getWindCardinal(weather.attributes.wind_bearing) }}</span>
@@ -45,7 +45,7 @@
             </svg>
              <span class="text-slate-400 text-xs font-bold uppercase tracking-wider">Baro</span>
           </div>
-          <div class="text-xl font-bold">{{ weather.attributes.pressure }}</div>
+          <div class="text-xl font-bold">{{ roundValue(weather.attributes.pressure) }}</div>
           <span class="text-xs text-slate-500">hPa</span>
         </div>
 
@@ -129,5 +129,12 @@ const getWeatherIconPath = (condition) => {
   if (!condition) return weatherIcons.default;
   const normalized = condition.toLowerCase().replace(/\s+/g, '-');
   return weatherIcons[normalized] || weatherIcons.default;
+};
+
+const roundValue = (val) => {
+  if (val === undefined || val === null) return '-';
+  const str = String(val).replace(',', '.');
+  const num = parseFloat(str);
+  return isNaN(num) ? val : Math.round(num);
 };
 </script>
