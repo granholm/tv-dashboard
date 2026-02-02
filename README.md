@@ -7,7 +7,7 @@ A 1080p dashboard designed for a Raspberry Pi or equivalent to display a newsfee
 
 ## Features
 
-- **News Rotator**: Fetches news from Google RSS (configurable) and rotates through top stories.
+- **News Rotator**: Fetches news from a configurable RSS-feed and rotates through top stories.
 - **Weather Widget**: Displays current weather and forecast from Home Assistant (`weather.smhi_home`).
 - **Energy Monitor**: Shows current Nordpool electricity price with color coding (Low/Med/High) and a day-view chart.
 - **Mock Mode**: Can run without a Home Assistant connection for testing/demo purposes.
