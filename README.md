@@ -2,6 +2,8 @@
 
 A 1080p dashboard designed for Raspberry Pi to display Home Assistant data, weather, energy prices, and news depending on the time of day.
 
+<img width="1916" height="1077" alt="image" src="https://github.com/user-attachments/assets/c05ea951-a0eb-47e8-ae72-8d0ad548c2ce" />
+
 ## Features
 
 - **News Rotator**: Fetches news from Google RSS (configurable) and rotates through top stories.
